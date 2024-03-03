@@ -5,7 +5,7 @@ and implemented the  pipeline to render 2D and 3D models in the engine.
 The engine is also capable of rendering models with textures and shading.
 
 ## Rendering Pipeline
-Use this for pipeline reference
+![gl_pipeline](https://github.com/nehaask/CG-Rasterisation-Engine/assets/60215440/b56ecd6e-dcf4-449b-9e19-71d3b3eb0f74)
 (cc: http://www.songho.ca/opengl/gl_pipeline.html)
 
 ## Features
