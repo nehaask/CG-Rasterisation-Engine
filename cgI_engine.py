@@ -1,17 +1,13 @@
+from vertex import Vertex
+
+
 class CGIengine:
     def __init__(self, myWindow, defaction):
-        # Initialize the CGIengine with a window and a default action
-        self.w_width = myWindow.width  # Store the window's width
-        self.w_height = myWindow.height  # Store the window's height
-        self.win = myWindow  # Store the window object
-        self.keypressed = 1  # Set an initial keypressed value to 1
-        self.default_action = defaction  # Store the default action
-
-    def rasterizeTriangle(self, p0, p1, p2):
-        pass
-
-    def drawTriangles(self, vertex_pos, colors, indices):
-        pass
+        self.w_width = myWindow.width
+        self.w_height = myWindow.height
+        self.win = myWindow
+        self.keypressed = 1
+        self.default_action = defaction
 
     def draw_star(self, pixel_x, pixel_y, r, g, b):
         for x in range(pixel_x - 7, pixel_x + 8):
@@ -106,34 +102,66 @@ class CGIengine:
                         else:
                             d -= (2 * dx)
 
+    def drawTriangles(self, vertex_pos, colors, indices):
+        for i in range(0, len(indices), 3):
+            triangle_indices = indices[i:i + 3]
+
+            vertices = []
+            for index in triangle_indices:
+                x = vertex_pos[2 * index]
+                y = vertex_pos[(2 * index) + 1]
+                r = colors[(3 * index)]
+                g = colors[(3 * index) + 1]
+                b = colors[(3 * index) + 2]
+                vertices.append(Vertex(x, y, r, g, b))
+            self.rasterizeTriangle(vertices[0], vertices[1], vertices[2])
+
+    def rasterizeTriangle(self, p0, p1, p2):
+        min_x = min(p0.x, p1.x, p2.x)
+        max_x = max(p0.x, p1.x, p2.x)
+        min_y = min(p0.y, p1.y, p2.y)
+        max_y = max(p0.y, p1.y, p2.y)
+
+        for y in range(min_y, max_y + 1):
+            for x in range(min_x, max_x + 1):
+                edge_function01 = self.calculateEdgeFunction(p0, p1, x, y)
+                edge_function12 = self.calculateEdgeFunction(p1, p2, x, y)
+                edge_function20 = self.calculateEdgeFunction(p2, p0, x, y)
+
+                if (
+                        edge_function01 >= 0 and edge_function12 >= 0 and edge_function20 >= 0) \
+                        or (
+                        edge_function01 < 0 and edge_function12 < 0 and edge_function20 < 0):
+                    total_area = abs(
+                        0.5 * self.calculateEdgeFunction(p1, p2, p0.x, p0.y))
+
+                    # Calculate barycentric coordinates.
+                    alpha = edge_function12 / (2 * total_area)
+                    beta = edge_function20 / (2 * total_area)
+                    gamma = edge_function01 / (2 * total_area)
+
+                    pixel_color = (
+                        int(alpha * p0.r + beta * p1.r + gamma * p2.r),
+                        int(alpha * p0.g + beta * p1.g + gamma * p2.g),
+                        int(alpha * p0.b + beta * p1.b + gamma * p2.b)
+                    )
+
+                    self.win.set_pixel(x, y, pixel_color[0], pixel_color[1],
+                                       pixel_color[2])
+
+    def calculateEdgeFunction(self, p0, p1, x, y):
+        return (x - p0.x) * (p1.y - p0.y) - (y - p0.y) * (p1.x - p0.x)
+
     # go is called on every update of the window display loop
     # have your engine draw stuff in the window.
     def go(self):
         if (self.keypressed == 1):
             # default scene
             self.default_action()
-            self.rasterizeLine(100, 100, 500, 500, 255, 0, 0)  # red
-            self.rasterizeLine(100, 200, 500, 400, 0, 255, 0)  # green
-            self.rasterizeLine(100, 300, 500, 300, 0, 0, 255)  # blue
-            self.rasterizeLine(100, 400, 500, 200, 255, 255, 0)  # yellow
-            self.rasterizeLine(100, 500, 500, 100, 0, 255, 255)  # dark cyan
-            self.rasterizeLine(200, 500, 400, 100, 255, 0, 255)  # pink
-            self.rasterizeLine(300, 500, 300, 100, 255, 255, 255)  # white
-            self.rasterizeLine(400, 500, 200, 100, 128, 255, 255)  # cyan
-            self.rasterizeLine(500, 450, 100, 150, 34, 200, 10)  # parrot green
-            self.rasterizeLine(450, 100, 150, 500, 34, 200, 140)  # dark green
 
         if (self.keypressed == 2):
-            # NK initials
+            # add you own unique scene here
             self.win.clearFB(0, 0, 0)
-            self.rasterizeLine(150, 550, 150, 250, 255, 255, 255)
-            self.rasterizeLine(350, 550, 350, 250, 255, 255, 255)
-            self.rasterizeLine(150, 550, 350, 250, 255, 255, 255)
-            self.rasterizeLine(450, 550, 450, 250, 255, 255, 255)
-            self.rasterizeLine(450, 400, 700, 550, 255, 255, 255)
-            self.rasterizeLine(450, 400, 700, 250, 255, 255, 255)
-
-
 
         # push the window's framebuffer to the window
         self.win.applyFB()
