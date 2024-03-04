@@ -128,12 +128,13 @@ class CGIengine:
                 edge_function12 = self.calculateEdgeFunction(p1, p2, x, y)
                 edge_function20 = self.calculateEdgeFunction(p2, p0, x, y)
 
-                if (
-                        edge_function01 >= 0 and edge_function12 >= 0 and edge_function20 >= 0) \
-                        or (
-                        edge_function01 < 0 and edge_function12 < 0 and edge_function20 < 0):
+                if (edge_function01 >= 0 and edge_function12 >= 0 and edge_function20 >= 0) or (
+                        edge_function01 <= 0 and edge_function12 <= 0 and edge_function20 <= 0):
                     total_area = abs(
                         0.5 * self.calculateEdgeFunction(p1, p2, p0.x, p0.y))
+
+                    if total_area == 0.0:
+                        total_area = 1
 
                     # Calculate barycentric coordinates.
                     alpha = edge_function12 / (2 * total_area)
@@ -159,9 +160,16 @@ class CGIengine:
             # default scene
             self.default_action()
 
+
         if (self.keypressed == 2):
-            # add you own unique scene here
+            # NK initials
             self.win.clearFB(0, 0, 0)
+            self.rasterizeLine(150, 550, 150, 250, 255, 255, 255)
+            self.rasterizeLine(350, 550, 350, 250, 255, 255, 255)
+            self.rasterizeLine(150, 550, 350, 250, 255, 255, 255)
+            self.rasterizeLine(450, 550, 450, 250, 255, 255, 255)
+            self.rasterizeLine(450, 400, 700, 550, 255, 255, 255)
+            self.rasterizeLine(450, 400, 700, 250, 255, 255, 255)
 
         # push the window's framebuffer to the window
         self.win.applyFB()

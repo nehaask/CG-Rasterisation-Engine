@@ -6,6 +6,7 @@ The engine is also capable of rendering models with textures and shading.
 
 ## Rendering Pipeline
 Use this for pipeline reference
+
 (cc: http://www.songho.ca/opengl/gl_pipeline.html)
 
 ## Features
@@ -23,5 +24,6 @@ Use this for pipeline reference
 - Illumination: Angular, Specular and Diffuse Illumination
 - Shading using Gouroud and Phong's Model
 - Texture Mapping using Procedural and Stored textures
+
 
 
