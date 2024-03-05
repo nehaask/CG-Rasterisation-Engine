@@ -1,6 +1,6 @@
 # CG-Rasterisation-Engine
 
-Reconstructed the OpenGL API engine in Python
+Reconstructed the OpenGL API in Python
 and implemented the  pipeline to render 2D and 3D models in the engine.
 The engine is also capable of rendering models with textures and shading.
 
