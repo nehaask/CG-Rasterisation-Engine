@@ -1,3 +1,6 @@
+import glm
+import numpy as np
+
 from vertex import Vertex
 
 
@@ -8,6 +11,9 @@ class CGIengine:
         self.win = myWindow
         self.keypressed = 1
         self.default_action = defaction
+        self.model_matrix = glm.mat3(1.0)
+        self.normalization_matrix = glm.mat3(1.0)
+        self.view_matrix = glm.mat3(1.0)
 
     def draw_star(self, pixel_x, pixel_y, r, g, b):
         for x in range(pixel_x - 7, pixel_x + 8):
@@ -114,6 +120,13 @@ class CGIengine:
                 g = colors[(3 * index) + 1]
                 b = colors[(3 * index) + 2]
                 vertices.append(Vertex(x, y, r, g, b))
+
+            for i in range(len(vertices)):
+                transformed_vertex = glm.vec3(vertices[i].x, vertices[i].y, 1)
+                transformed_vertex = self.view_matrix * self.normalization_matrix * self.model_matrix * transformed_vertex
+                vertices[i].x = int(transformed_vertex.x)
+                vertices[i].y = int(transformed_vertex.y)
+
             self.rasterizeTriangle(vertices[0], vertices[1], vertices[2])
 
     def rasterizeTriangle(self, p0, p1, p2):
@@ -128,11 +141,13 @@ class CGIengine:
                 edge_function12 = self.calculateEdgeFunction(p1, p2, x, y)
                 edge_function20 = self.calculateEdgeFunction(p2, p0, x, y)
 
-                if (edge_function01 >= 0 and edge_function12 >= 0 and edge_function20 >= 0) or (
-                        edge_function01 <= 0 and edge_function12 <= 0 and edge_function20 <= 0):
+                if (
+                        edge_function01 >= 0 and edge_function12 >= 0 and edge_function20 >= 0) \
+                        or \
+                        (
+                                edge_function01 < 0 and edge_function12 < 0 and edge_function20 < 0):
                     total_area = abs(
                         0.5 * self.calculateEdgeFunction(p1, p2, p0.x, p0.y))
-
                     if total_area == 0.0:
                         total_area = 1
 
@@ -153,6 +168,35 @@ class CGIengine:
     def calculateEdgeFunction(self, p0, p1, x, y):
         return (x - p0.x) * (p1.y - p0.y) - (y - p0.y) * (p1.x - p0.x)
 
+    def clearModelTransform(self):
+        self.model_matrix = glm.mat3(1.0)
+
+    def translate(self, x, y):
+        self.model_matrix[2][0] += x
+        self.model_matrix[2][1] += y
+
+    def scale(self, x, y):
+        self.model_matrix[0][0] *= x
+        self.model_matrix[1][1] *= y
+
+    def rotate(self, angle):
+        self.model_matrix[0][0] *= np.cos(angle * (np.pi / 180))
+        self.model_matrix[0][1] += np.sin(angle * (np.pi / 180))
+        self.model_matrix[1][0] += -np.sin(angle * (np.pi / 180))
+        self.model_matrix[1][1] *= np.cos(angle * (np.pi / 180))
+
+    def defineClipWindow(self, t, b, r, l):
+        self.normalization_matrix[0][0] *= (2 / (r - l))
+        self.normalization_matrix[2][0] += ((-2 * l) / (r - l)) - 1
+        self.normalization_matrix[2][1] += ((-2 * b) / (t - b)) - 1
+        self.normalization_matrix[1][1] *= (2 / (t - b))
+
+    def defineViewWindow(self, t, b, r, l):
+        self.view_matrix[0][0] *= ((r - l) / 2)
+        self.view_matrix[2][0] += ((r + l) / 2)
+        self.view_matrix[2][1] += ((t + b) / 2)
+        self.view_matrix[1][1] *= ((t - b) / 2)
+
     # go is called on every update of the window display loop
     # have your engine draw stuff in the window.
     def go(self):
@@ -160,16 +204,9 @@ class CGIengine:
             # default scene
             self.default_action()
 
-
         if (self.keypressed == 2):
-            # NK initials
+            # add you own unique scene here
             self.win.clearFB(0, 0, 0)
-            self.rasterizeLine(150, 550, 150, 250, 255, 255, 255)
-            self.rasterizeLine(350, 550, 350, 250, 255, 255, 255)
-            self.rasterizeLine(150, 550, 350, 250, 255, 255, 255)
-            self.rasterizeLine(450, 550, 450, 250, 255, 255, 255)
-            self.rasterizeLine(450, 400, 700, 550, 255, 255, 255)
-            self.rasterizeLine(450, 400, 700, 250, 255, 255, 255)
 
         # push the window's framebuffer to the window
         self.win.applyFB()
