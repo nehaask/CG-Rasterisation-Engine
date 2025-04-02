@@ -1,8 +1,9 @@
 import signal
 
-import numpy as np
 from OpenGL.GL import *
 from OpenGL.GLUT import *
+
+from cgI_engine import *
 
 
 class RitWindow:
@@ -37,15 +38,18 @@ class RitWindow:
     def clearFB(self, r, g, b):
         for x in range(self.width):
             for y in range(self.height):
-                self.set_pixel(x, y, r, g, b)
-
+                self.set_pixel(x, y, round(255 * r), round(255 * g),
+                               round(255 * b))
+        
     def set_pixel(self, x, y, r, g, b):
         # sets the pixel at (x,y) to (r, g, b, 255), with 8-bit integer colors
-        self.framebuffer[x * 4 + 0 + y * self.width * 4] = r  # r
-        self.framebuffer[x * 4 + 1 + y * self.width * 4] = g  # g
-        self.framebuffer[x * 4 + 2 + y * self.width * 4] = b  # b
-        self.framebuffer[x * 4 + 3 + y * self.width * 4] = 255  # a
-
+        yy = self.height - y - 1
+        self.framebuffer[x * 4 + 0 + yy * self.width * 4] = r  # r
+        self.framebuffer[x * 4 + 1 + yy * self.width * 4] = g  # g
+        self.framebuffer[x * 4 + 2 + yy * self.width * 4] = b  # b
+        self.framebuffer[x * 4 + 3 + yy * self.width * 4] = 255  # a
+        
+        
     def applyFB(self):
         glEnable(GL_TEXTURE_2D)
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
@@ -78,7 +82,7 @@ class RitWindow:
         # internal function that actually draws the scene
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         glLoadIdentity()
-        glDisable(GL_LIGHTING)
+        glDisable(GL_LIGHTING) 
         glViewport(0, 0, self.width, self.height)
         glMatrixMode(GL_PROJECTION)
         glLoadIdentity()
@@ -105,7 +109,7 @@ class RitWindow:
         for i in range(left, right):
             self.set_pixel(i, top, r, g, b)
             self.set_pixel(i, bottom, r, g, b)
-
+          
         # left and right
         for j in range(bottom, top):
             self.set_pixel(left, j, r, g, b)
