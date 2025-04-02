@@ -253,19 +253,11 @@ class CGIengine:
     # multiply translate matrix to current model transform
     def translate(self, x, y, z):
         # translate along x, y and z axes
-        # self.model_matrix[3][0] += x
-        # self.model_matrix[3][1] += y
-        # self.model_matrix[3][2] += z
-        # self.transformation_stack[-1] = self.model_matrix * self.transformation_stack[-1]
         self.transformation_stack[-1] = glm.translate(
             self.transformation_stack[-1], glm.vec3(x, y, z))
 
     # multiply scale matrix to current model transform
     def scale(self, x, y, z):
-        # scale_mat = glm.mat4(1.0)
-        # scaling_matrix = glm.scale(scale_mat, glm.vec3(x, y, z))
-        # self.model_matrix = self.model_matrix * scaling_matrix
-        # self.transformation_stack[-1] = scaling_matrix * self.transformation_stack[-1]
         self.transformation_stack[-1] = glm.scale(self.transformation_stack[-1],
                                                   glm.vec3(x, y, z))
 
@@ -276,7 +268,6 @@ class CGIengine:
         rotation_matrix[1][2] = np.sin(np.deg2rad(angle))
         rotation_matrix[2][1] = -np.sin(np.deg2rad(angle))
         rotation_matrix[2][2] = np.cos(np.deg2rad(angle))
-        # self.model_matrix = self.model_matrix * rotation_matrix
         self.transformation_stack[-1] = self.transformation_stack[
                                             -1] * rotation_matrix
 
@@ -287,7 +278,6 @@ class CGIengine:
         rotation_matrix[0][2] = -np.sin(np.deg2rad(angle))
         rotation_matrix[2][0] = np.sin(np.deg2rad(angle))
         rotation_matrix[2][2] = np.cos(np.deg2rad(angle))
-        # self.model_matrix = self.model_matrix * rotation_matrix
         self.transformation_stack[-1] = self.transformation_stack[
                                             -1] * rotation_matrix
 
@@ -298,7 +288,6 @@ class CGIengine:
         rotation_matrix[0][1] = np.sin(np.deg2rad(angle))
         rotation_matrix[1][0] = -np.sin(np.deg2rad(angle))
         rotation_matrix[1][1] = np.cos(np.deg2rad(angle))
-        # self.model_matrix = self.model_matrix * rotation_matrix
         self.transformation_stack[-1] = self.transformation_stack[
                                             -1] * rotation_matrix
 
